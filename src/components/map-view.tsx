@@ -1,34 +1,18 @@
-import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, type Libraries, useJsApiLoader } from '@react-google-maps/api';
 import type { ForwardedRef } from 'react';
-import React, {
-  forwardRef,
-  memo,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from 'react';
-import type {
-  Address,
-  Camera,
-  EdgePadding,
-  LatLng,
-  MapViewProps,
-  Point,
-  Region,
-  SnapshotOptions,
-} from 'react-native-maps';
+import React, { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import type RNMapView from 'react-native-maps';
+import type { Address, Camera, EdgePadding, SnapshotOptions } from 'react-native-maps';
+import { LatLng, Point, Region } from 'react-native-maps';
+import { MapViewProps } from '../override-types';
 import { mapMouseEventToMapEvent } from '../utils/mouse-event';
 import { transformRNCameraObject } from '../utils/camera';
-import {
-  logMethodNotImplementedWarning,
-  logDeprecationWarning,
-} from '../utils/log';
+import { logDeprecationWarning, logMethodNotImplementedWarning } from '../utils/log';
 import { useUserLocation } from '../hooks/use-user-location';
 import { UserLocationMarker } from './user-location-marker';
 import * as Location from 'expo-location';
+
+const LIBRARIES: Libraries = ['marker'];
 
 function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
   // State
@@ -46,6 +30,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: props.googleMapsApiKey || '',
+    libraries: LIBRARIES,
   });
 
   // Callbacks
@@ -55,7 +40,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
       setMap(_map);
       props.onMapReady?.();
     },
-    [map, props.onMapReady]
+    [map, props.onMapReady],
   );
 
   const _onDragStart = useCallback(() => {
@@ -77,7 +62,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
           latitudeDelta,
           longitudeDelta,
         },
-        { isGesture }
+        { isGesture },
       );
     }
   }, [map, props.onRegionChange, isGesture]);
@@ -97,7 +82,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
           latitudeDelta,
           longitudeDelta,
         },
-        { isGesture }
+        { isGesture },
       );
     }
     setIsGesture(false);
@@ -126,7 +111,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
       },
       animateCamera(
         camera: Partial<Camera>,
-        _opts?: { duration?: number }
+        _opts?: { duration?: number },
       ): void {
         map?.moveCamera(transformRNCameraObject(camera));
       },
@@ -173,7 +158,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
       },
       fitToCoordinates(
         coordinates?: LatLng[],
-        options?: { edgePadding?: EdgePadding; animated?: boolean }
+        options?: { edgePadding?: EdgePadding; animated?: boolean },
       ): void {
         const bounds = new google.maps.LatLngBounds();
 
@@ -182,7 +167,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
             bounds.extend({
               lat: c.latitude,
               lng: c.longitude,
-            })
+            }),
           );
         }
 
@@ -215,30 +200,28 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
         return '';
       },
       async addressForCoordinate(_coordinate: LatLng): Promise<Address> {
-        Location.setGoogleApiKey(props.googleMapsApiKey || '');
-        const [address] = await Location.reverseGeocodeAsync(_coordinate, {
-          useGoogleMaps: true,
-        });
+        //Location.setGoogleApiKey(props.googleMapsApiKey || ''); Doesn't exist anymore
+        const [address] = await Location.reverseGeocodeAsync(_coordinate);
 
         return address
           ? {
-              administrativeArea: address.region || '',
-              country: address.country || '',
-              countryCode: address.isoCountryCode || '',
-              locality: address.city || '',
-              postalCode: address.postalCode || '',
-              name: address.name || '',
-              subAdministrativeArea: address.subregion || '',
-              subLocality: address.city || '',
-              thoroughfare: '',
-            }
+            administrativeArea: address.region || '',
+            country: address.country || '',
+            countryCode: address.isoCountryCode || '',
+            locality: address.city || '',
+            postalCode: address.postalCode || '',
+            name: address.name || '',
+            subAdministrativeArea: address.subregion || '',
+            subLocality: address.city || '',
+            thoroughfare: '',
+          }
           : (null as unknown as Address);
       },
       animateToNavigation(
         _location: LatLng,
         _bearing: number,
         _angle: number,
-        _duration?: number
+        _duration?: number,
       ): void {
         logDeprecationWarning('animateToNavigation');
       },
@@ -259,7 +242,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
       },
       fitToSuppliedMarkers(
         _markers: string[],
-        _options?: { edgePadding?: EdgePadding; animated?: boolean }
+        _options?: { edgePadding?: EdgePadding; animated?: boolean },
       ): void {
         logMethodNotImplementedWarning('fitToSuppliedMarkers');
       },
@@ -267,7 +250,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
         logMethodNotImplementedWarning('setIndoorActiveLevelIndex');
       },
     }),
-    [map]
+    [map],
   );
 
   // Side effects
@@ -300,8 +283,8 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
               null,
               center && { latitude: center.lat(), longitude: center.lng() },
               map,
-              undefined
-            )
+              undefined,
+            ),
           );
         }}
         onClick={(e) =>
@@ -314,15 +297,15 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
           map
             ? map.getCenter()
             : {
-                lat:
-                  props.initialCamera?.center.latitude ||
-                  props.initialRegion?.latitude ||
-                  0,
-                lng:
-                  props.initialCamera?.center.longitude ||
-                  props.initialRegion?.longitude ||
-                  0,
-              }
+              lat:
+                props.initialCamera?.center.latitude ||
+                props.initialRegion?.latitude ||
+                0,
+              lng:
+                props.initialCamera?.center.longitude ||
+                props.initialRegion?.longitude ||
+                0,
+            }
         }
         options={{
           scrollwheel: props.zoomEnabled,
@@ -333,13 +316,16 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
           maxZoom: props.maxZoomLevel, // TODO: Normalize value
           scaleControl: props.showsScale,
           styles: props.customMapStyle,
+          mapId: props.googleMapsMapId,
           ...(props.options || {}),
         }}
       >
-        {props.showsUserLocation && userLocation && (
-          <UserLocationMarker coordinates={userLocation.coords} />
-        )}
-        {props.children}
+        <>
+          {props.showsUserLocation && userLocation && (
+            <UserLocationMarker coordinates={userLocation.coords} />
+          )}
+          {props.children}
+        </>
       </GoogleMap>
     ),
     [
@@ -361,12 +347,12 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
       props.showsScale,
       props.customMapStyle,
       props.options,
-    ]
+    ],
   );
 
   if (props.provider !== 'google') {
     console.warn(
-      '[WARNING] `react-native-web-maps` only suppots google for now. Please pass "google" as provider in props'
+      '[WARNING] `react-native-web-maps` only suppots google for now. Please pass "google" as provider in props',
     );
 
     return null;

@@ -1,4 +1,4 @@
-import type React from 'react';
+import React, { JSX } from 'react';
 import type { LatLng, Region } from 'react-native-maps';
 
 export type ClusterProps<P extends object = {}> = {

@@ -22,3 +22,24 @@ export function mapMouseEventToMapEvent<T>(
     },
   } as T;
 }
+
+export function createMarkerPressEvent<T>(
+  coordinate: LatLng,
+  map: google.maps.Map,
+  action: string,
+  id: string
+): T {
+  const projection = map.getProjection();
+  const latLng = new google.maps.LatLng(coordinate.latitude, coordinate.longitude);
+  const point = projection?.fromLatLngToPoint(latLng);
+
+  return {
+    nativeEvent: {
+      id,
+      action,
+      coordinate,
+      position: point ? { x: point.x, y: point.y } : undefined,
+    },
+  } as T;
+}
+
