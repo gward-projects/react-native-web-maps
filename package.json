@@ -37,8 +37,8 @@
     "react-native-maps": "*"
   },
   "dependencies": {
-    "@react-google-maps/api": "^2.20.7",
-    "expo-location": "^18.1.6",
-    "supercluster": "^8.0.1"
+    "@react-google-maps/api": "2.20.7",
+    "expo-location": "18.1.6",
+    "supercluster": "8.0.1"
   }
 }
