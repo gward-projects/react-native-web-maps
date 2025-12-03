@@ -1,11 +1,15 @@
 import type { ClusterProps, MarkerClustererProps } from './types';
-import { JSX, type ReactElement } from 'react';
-import React, { memo, useMemo, useState } from 'react';
+import React, { JSX, memo, type ReactElement, useMemo, useState } from 'react';
 import { getBoundByRegion } from '../../utils/region';
 import type { MapMarkerProps } from 'react-native-maps';
 import { Cluster } from './cluster';
 import Supercluster from 'supercluster';
 import { Marker } from '../marker';
+
+type ClusterType = (Supercluster.PointFeature<{
+  node: JSX.Element
+  cluster: boolean
+}> | Supercluster.ClusterFeature<Supercluster.AnyProps>);
 
 function _MarkerClusterer(props: MarkerClustererProps) {
   const [supercluster, _setSupercluster] = useState<
@@ -17,7 +21,7 @@ function _MarkerClusterer(props: MarkerClustererProps) {
       (React.Children.toArray(props.children).filter((child) => {
         return (child as ReactElement).type === Marker;
       }) as ReactElement<MapMarkerProps>[]) || [],
-    [props.children]
+    [props.children],
   );
 
   const points = useMemo<
@@ -35,10 +39,10 @@ function _MarkerClusterer(props: MarkerClustererProps) {
           ],
         },
       })),
-    [markers]
+    [markers],
   );
 
-  const clusters = useMemo(() => {
+  const clusters: ClusterType[] = useMemo(() => {
     if (!props.region) return [];
 
     const bbox = getBoundByRegion(props.region);
@@ -47,19 +51,19 @@ function _MarkerClusterer(props: MarkerClustererProps) {
 
     return supercluster.getClusters(
       bbox,
-      Math.round(Math.log(360 / props.region.longitudeDelta) / Math.LN2)
+      Math.round(Math.log(360 / props.region.longitudeDelta) / Math.LN2),
     );
   }, [props.region, points]);
 
   return (
     <>
-      {clusters.map((feature, idx) => {
+      {clusters.map((feature: ClusterType, idx: number) => {
         const clusterProperties =
           feature.properties as Supercluster.ClusterProperties;
 
         const clusterProps: ClusterProps = {
           expansionZoom: supercluster.getClusterExpansionZoom(
-            clusterProperties.cluster_id
+            clusterProperties.cluster_id,
           ),
           pointCount: clusterProperties.point_count,
           pointCountAbbreviated: clusterProperties.point_count_abbreviated,
@@ -71,10 +75,10 @@ function _MarkerClusterer(props: MarkerClustererProps) {
 
         return (
           <React.Fragment key={idx.toString()}>
-            {feature.properties.cluster === true
+            {feature.properties.cluster
               ? props.renderCluster?.(clusterProps) || (
-                  <Cluster {...clusterProps} />
-                )
+              <Cluster {...clusterProps} />
+            )
               : feature.properties.node}
           </React.Fragment>
         );

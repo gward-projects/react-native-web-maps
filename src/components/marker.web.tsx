@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGoogleMap } from '@react-google-maps/api';
-import type { MapMarkerProps, Point } from 'react-native-maps';
+import type { MapMarkerProps, Point} from 'react-native-maps';
 import { createMarkerPressEvent, mapMouseEventToMapEvent } from '../utils/mouse-event';
 import type { CalloutContextType } from './callout';
 import { CalloutContext } from './callout';
