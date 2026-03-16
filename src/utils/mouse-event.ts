@@ -4,7 +4,7 @@ export function mapMouseEventToMapEvent<T>(
   e?: google.maps.MapMouseEvent | null,
   defaultCoordinate?: LatLng | AnimatedRegion | null,
   map?: google.maps.Map | null,
-  action?: string
+  action?: string,
 ) {
   return {
     preventDefault: e?.stop,
@@ -27,7 +27,7 @@ export function createMarkerPressEvent<T>(
   coordinate: LatLng,
   map: google.maps.Map,
   action: string,
-  id: string
+  id: string,
 ): T {
   const projection = map.getProjection();
   const latLng = new google.maps.LatLng(coordinate.latitude, coordinate.longitude);

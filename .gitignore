@@ -65,3 +65,8 @@ dist/
 .turbo
 package-lock.json
 .env
+
+.yarn/*
+.pnp.*
+!.yarn/patches/
+!.yarn/patches/**

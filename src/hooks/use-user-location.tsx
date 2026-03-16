@@ -4,9 +4,10 @@ import type { UserLocationChangeEvent } from 'react-native-maps';
 
 interface UseUserLocationOptions {
   requestPermission: boolean;
-  onUserLocationChange?(e: UserLocationChangeEvent): void;
   followUserLocation: boolean;
   showUserLocation: boolean;
+
+  onUserLocationChange?(e: UserLocationChangeEvent): void;
 }
 
 export function useUserLocation(options: UseUserLocationOptions) {
@@ -21,7 +22,7 @@ export function useUserLocation(options: UseUserLocationOptions) {
   });
 
   const handleLocationChange = useCallback(
-    function (e: Location.LocationObject) {
+    function(e: Location.LocationObject) {
       setLocation(e);
       options.onUserLocationChange?.({
         nativeEvent: {
@@ -37,7 +38,7 @@ export function useUserLocation(options: UseUserLocationOptions) {
         },
       } as unknown as UserLocationChangeEvent);
     },
-    [options.onUserLocationChange]
+    [options.onUserLocationChange],
   );
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export function useUserLocation(options: UseUserLocationOptions) {
       // Watch position
       Location.watchPositionAsync(
         { accuracy: Location.Accuracy.Balanced },
-        handleLocationChange
+        handleLocationChange,
       ).then(setWatchPositionSubscription);
     }
 

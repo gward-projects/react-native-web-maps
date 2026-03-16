@@ -1,10 +1,6 @@
 import * as React from 'react';
-import {
-  InfoWindow as GMInfoWindow,
-  OverlayView as GMOverlayView,
-  useGoogleMap,
-} from '@react-google-maps/api';
-import type { MapCalloutProps, LatLng, Point } from 'react-native-maps';
+import { InfoWindow as GMInfoWindow, OverlayView as GMOverlayView, useGoogleMap } from '@react-google-maps/api';
+import type { LatLng, MapCalloutProps, Point } from 'react-native-maps';
 import { mapMouseEventToMapEvent } from '../utils/mouse-event';
 
 export type CalloutContextType = {
@@ -18,7 +14,8 @@ export type CalloutContextType = {
 export const CalloutContext = React.createContext<CalloutContextType>({
   coordinate: { latitude: 0, longitude: 0 },
   calloutVisible: false,
-  toggleCalloutVisible: () => {},
+  toggleCalloutVisible: () => {
+  },
   markerSize: { width: 0, height: 0 },
   anchor: { x: 0, y: 0 },
 });
@@ -44,7 +41,7 @@ export function Callout(props: MapCalloutProps) {
     <div
       onClick={(e) => {
         props.onPress?.(
-          mapMouseEventToMapEvent(null, coordinate, map, 'callout-press')
+          mapMouseEventToMapEvent(null, coordinate, map, 'callout-press'),
         );
         e.stopPropagation(); //Prevent marker click handler from being called
       }}

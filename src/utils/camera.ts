@@ -1,7 +1,7 @@
 import type { Camera } from 'react-native-maps';
 
 export function transformRNCameraObject(
-  camera: Partial<Camera>
+  camera: Partial<Camera>,
 ): google.maps.CameraOptions {
   return {
     tilt: camera.pitch,
@@ -9,9 +9,9 @@ export function transformRNCameraObject(
     zoom: camera.zoom,
     center: camera.center
       ? {
-          lat: camera.center?.latitude,
-          lng: camera.center?.longitude,
-        }
+        lat: camera.center?.latitude,
+        lng: camera.center?.longitude,
+      }
       : undefined,
   };
 }

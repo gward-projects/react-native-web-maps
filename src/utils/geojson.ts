@@ -11,12 +11,12 @@ export const makeOverlays = (features: GeoJSON.Feature[]) => {
     .filter(
       (f) =>
         f.geometry &&
-        (f.geometry.type === 'Point' || f.geometry.type === 'MultiPoint')
+        (f.geometry.type === 'Point' || f.geometry.type === 'MultiPoint'),
     )
     .map((feature) =>
       makeCoordinates(feature).map((coordinates) =>
-        makeOverlay(coordinates as any, feature)
-      )
+        makeOverlay(coordinates as any, feature),
+      ),
     )
     .reduce(flatten as any, [])
     .map((overlay) => ({ ...overlay, type: 'point' }));
@@ -26,12 +26,12 @@ export const makeOverlays = (features: GeoJSON.Feature[]) => {
       (f) =>
         f.geometry &&
         (f.geometry.type === 'LineString' ||
-          f.geometry.type === 'MultiLineString')
+          f.geometry.type === 'MultiLineString'),
     )
     .map((feature) =>
       makeCoordinates(feature).map((coordinates) =>
-        makeOverlay(coordinates as any, feature)
-      )
+        makeOverlay(coordinates as any, feature),
+      ),
     )
     .reduce(flatten as any, [])
     .map((overlay) => ({ ...overlay, type: 'polyline' }));
@@ -40,8 +40,8 @@ export const makeOverlays = (features: GeoJSON.Feature[]) => {
     .filter((f) => f.geometry && f.geometry.type === 'MultiPolygon')
     .map((feature) =>
       makeCoordinates(feature).map((coordinates) =>
-        makeOverlay(coordinates as any, feature)
-      )
+        makeOverlay(coordinates as any, feature),
+      ),
     )
     .reduce(flatten as any, []);
 
@@ -59,7 +59,7 @@ export const flatten = <T extends []>(prev: T, curr: T) => prev.concat(curr);
 
 export const makeOverlay = (
   coordinates: GeoJSON.Position,
-  feature: GeoJSON.Feature
+  feature: GeoJSON.Feature,
 ) => {
   let overlay: {
     feature: GeoJSON.Feature;
@@ -130,7 +130,7 @@ export const getColor = (
   props: any,
   overlay: any,
   colorType: any,
-  overrideColorProp: any
+  overrideColorProp: any,
 ) => {
   if (props.hasOwnProperty(overrideColorProp)) {
     return props[overrideColorProp];
@@ -144,7 +144,7 @@ export const getColor = (
     ) {
       color = getRgbaFromHex(
         color,
-        overlay.feature.properties[opacityProperty]
+        overlay.feature.properties[opacityProperty],
       );
     }
     return color;
