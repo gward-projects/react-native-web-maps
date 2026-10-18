@@ -1,6 +1,6 @@
 {
   "name": "react-native-web-maps",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "description": "Cross platform maps for react & react-native",
   "main": "src/index.web.tsx",
   "files": [

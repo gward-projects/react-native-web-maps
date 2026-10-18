@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { Children, isValidElement, type ReactNode } from 'react';
+import { AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
 import type { MapMarkerProps, Point } from 'react-native-maps';
-import { useMap } from '@vis.gl/react-google-maps';
 
-import { AdvancedMarker } from './AdvancedMarker';
-import { CalloutContext } from './callout';
+import { Callout, CalloutContext } from './callout';
 import type { CalloutContextType } from './callout';
 import { createMarkerPressEvent, mapMouseEventToMapEvent } from '../utils/mouse-event';
 
@@ -43,6 +42,24 @@ export class Marker extends React.Component<MapMarkerProps, MarkerState> {
 // Default Google Maps marker size, used to place the callout above the marker.
 const DEFAULT_MARKER_SIZE = { width: 22, height: 40 };
 
+/**
+ * Splits the marker's children between its visual content and its callouts, which are rendered
+ * next to the marker (in an InfoWindow or an overlay), not inside it.
+ *
+ * @param children children of the marker
+ */
+function partitionChildren(children: ReactNode): [ReactNode[], ReactNode[]] {
+  const visual: ReactNode[] = [];
+  const callouts: ReactNode[] = [];
+
+  Children.forEach(children, (child) => {
+    if (isValidElement(child) && child.type === Callout) callouts.push(child);
+    else visual.push(child);
+  });
+
+  return [visual, callouts];
+}
+
 interface MarkerFProps extends MapMarkerProps {
   calloutVisible: boolean;
   toggleCalloutVisible: () => void;
@@ -73,9 +90,15 @@ function MarkerF(props: MarkerFProps) {
     anchor: calloutAnchor,
   };
 
+  const [visual, callouts] = partitionChildren(props.children);
+  const hasContent = visual.length > 0;
+
   return (
     <CalloutContext.Provider value={calloutContextValue}>
       <AdvancedMarker
+        // Custom content is centered on the position; without content, the default pin keeps
+        // its bottom-center anchor.
+        {...(hasContent && { anchorLeft: '-50%', anchorTop: '-50%' })}
         clickable={props.tappable}
         draggable={props.draggable}
         position={{
@@ -95,8 +118,9 @@ function MarkerF(props: MarkerFProps) {
             props.onDragEnd?.(mapMouseEventToMapEvent(e, props.coordinate, map, '')),
         })}
       >
-        {props.children}
+        {hasContent ? visual : null}
       </AdvancedMarker>
+      {callouts}
     </CalloutContext.Provider>
   );
 }

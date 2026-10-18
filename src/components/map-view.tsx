@@ -13,7 +13,7 @@ import { transformRNCameraObject } from '../utils/camera';
 import { UserLocationMarker } from './user-location-marker';
 import { useUserLocation } from '../hooks/use-user-location';
 
-// The marker library provides the advanced markers (AdvancedMarker.tsx).
+// Loaded upfront for the advanced markers (marker.web.tsx).
 const LIBRARIES = ['marker'];
 
 function MapViewContent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
