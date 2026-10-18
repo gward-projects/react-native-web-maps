@@ -1,3 +1,6 @@
+// The sources use the global google namespace, also when gward-app compiles them.
+/// <reference types="google.maps" />
+
 export { MapView as default } from './components/map-view';
 export { Polygon } from './components/polygon';
 export { Marker } from './components/marker';

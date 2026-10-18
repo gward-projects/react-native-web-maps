@@ -43,3 +43,21 @@ export function createMarkerPressEvent<T>(
   } as T;
 }
 
+
+/**
+ * Converts a map mouse event from @vis.gl/react-google-maps to the Google Maps event that
+ * mapMouseEventToMapEvent expects.
+ *
+ * @param e map mouse event received by a vis.gl Map handler
+ */
+export function toGoogleMouseEvent(e: {
+  detail: { latLng: google.maps.LatLngLiteral | null };
+  stop: () => void;
+  domEvent?: Event;
+}): google.maps.MapMouseEvent {
+  return {
+    latLng: e.detail.latLng ? new google.maps.LatLng(e.detail.latLng) : null,
+    stop: e.stop,
+    domEvent: e.domEvent,
+  } as google.maps.MapMouseEvent;
+}

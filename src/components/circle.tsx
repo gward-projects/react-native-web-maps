@@ -1,5 +1,5 @@
 import React from 'react';
-import { Circle as GMCircle } from '@react-google-maps/api';
+import { Circle as GMCircle } from '@vis.gl/react-google-maps';
 import type { MapCircleProps } from 'react-native-maps';
 
 export function Circle(props: MapCircleProps) {
@@ -7,11 +7,9 @@ export function Circle(props: MapCircleProps) {
     <GMCircle
       center={{ lat: props.center.latitude, lng: props.center.longitude }}
       radius={props.radius}
-      options={{
-        fillColor: props.fillColor,
-        strokeColor: props.strokeColor,
-        zIndex: props.zIndex,
-      }}
+      fillColor={props.fillColor}
+      strokeColor={props.strokeColor}
+      zIndex={props.zIndex}
     />
   );
 }

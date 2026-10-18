@@ -2,7 +2,9 @@
 
 Ce dépôt est le fork Gward de
 [`react-native-web-maps`](https://github.com/teovillanueva/react-native-web-maps) (implémentation
-web, sur Google Maps, de l'API `react-native-maps`). Il est maintenu sur
+web, sur Google Maps, de l'API `react-native-maps`), réécrit sur
+[`@vis.gl/react-google-maps`](https://github.com/visgl/react-google-maps) au lieu de
+`@react-google-maps/api`. Il est maintenu sur
 `gward-projects/react-native-web-maps` ; le dépôt d'origine n'est pas déclaré comme remote (`git
 remote add upstream <url>` pour fusionner ses changements).
 
@@ -73,7 +75,7 @@ corriger ou en supprimer, comme dans gward-app
 
 Hors d'atteinte en l'état : les composants (`src/components/`) et `src/hooks/use-user-location.tsx`
 (rendu React, `google.maps` et `expo-location`), ainsi que `createMarkerPressEvent` qui exige le
-global `google`.
+global `google`. `toGoogleMouseEvent` est testé avec un faux `google.maps.LatLng`.
 
 ## Fichiers copiés de gward-app
 
@@ -103,9 +105,19 @@ imports de types avec les modules du projet.
 - `docs/` (site Docusaurus), `babel.config.js`, `tsconfig.build.json` et
   `react-native-builder-bob` ont été supprimés ;
 - dépendances des hooks corrigées (voir le journal du 17 octobre 2026) ;
-- `map-view.tsx` : le centre passé à `GoogleMap` est calculé une seule fois. Un nouvel objet à
-  chaque rendu faisait appeler `setCenter`, qui annulait un déplacement à la souris commencé par le
-  même appui (le rendu déclenché par `onDragStart` l'interrompait).
+- **`@vis.gl/react-google-maps`** remplace `@react-google-maps/api` (journal du 18 octobre 2026) :
+  `APIProvider` et `Map` dans `map-view.tsx`, `useMap` dans les marqueurs et callouts, composants
+  `InfoWindow`, `Polygon`, `Polyline` et `Circle` de vis.gl. vis.gl n'ayant pas d'`OverlayView`,
+  `overlay-view.tsx` en fournit un, utilisé par les callouts `tooltip`. La heatmap, jamais exportée
+  et reposant sur une couche dépréciée par Google, a été retirée ;
+- la carte est **non contrôlée** (`defaultCenter`, `defaultZoom`…) : un rendu ne la déplace jamais.
+  Un centre contrôlé, recalculé à chaque rendu, annulait un déplacement à la souris commencé par le
+  même appui. Ne pas repasser de props de caméra contrôlées à `Map` ; la déplacer depuis le code
+  passe par les méthodes de la ref (`animateToRegion`, etc.) ;
+- `Polygon` appelle `onPress`, que l'amont calculait sans l'appeler ;
+- `@types/google.maps` et `@types/react-dom` sont des dépendances livrées : gward-app compile les
+  sources du fork (dont `callout.tsx` et `overlay-view.tsx`), et le point d'entrée web référence
+  les types `google.maps`.
 
 ## Dépendances
 

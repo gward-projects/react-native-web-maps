@@ -1,6 +1,6 @@
 # Journal des mises à jour de dépendances
 
-**Nature :** historique vivant des revues de versions · **Dernière mise à jour :** 17 octobre 2026.
+**Nature :** historique vivant des revues de versions · **Dernière mise à jour :** 18 octobre 2026.
 
 Ce fichier suit les mêmes règles que le journal de gward-app
 (`documentation/journal-mises-a-jour-dependances.md`), dont il reprend le format.
@@ -21,6 +21,52 @@ Chaque correctif annoncé comme un apport doit être rattaché à la version exa
 comparant les archives npm et les commits amont (voir « Vérifier les changements réels » dans
 `documentation/procedures/agents/mettre-a-jour-dependances.md` de gward-app). Une simple montée
 sans différence à analyser ne nécessite pas d'entrée.
+
+## 18 octobre 2026 — Passage de @react-google-maps/api à @vis.gl/react-google-maps
+
+| Package | Départ | Arrivée |
+| ------- | ------ | ------- |
+| `@react-google-maps/api` | 2.20.8 | retiré |
+| `@vis.gl/react-google-maps` | — | 1.10.1 |
+| `@types/google.maps` | via `@react-google-maps/api` (3.58.1) | 3.66.7, dépendance directe |
+| `@types/react-dom` | 19.3.0 (développement) | 19.3.0, dépendance livrée |
+
+`@vis.gl/react-google-maps` est maintenu par l'équipe vis.gl (OpenJS Foundation) avec Google, et
+gère nativement les Advanced Markers ; `@react-google-maps/api` évoluait peu. Version 1.10.1 du
+21 septembre 2026 : exports et types lus dans l'archive npm (`APIProvider`, `Map`, `useMap`,
+`useApiIsLoaded`, `AdvancedMarker`, `InfoWindow`, `Polygon`, `Polyline`, `Circle`).
+
+### Changements de code
+
+- `map-view.tsx` : `APIProvider` (bibliothèque `marker`) et `Map` non contrôlé (`defaultCenter`,
+  `defaultZoom`, `defaultHeading`, `defaultTilt`) ; l'instance vient de `useMap(id)` avec un id
+  `useId` ; `onMapReady` est un effect event appelé une fois la carte prête ; les événements de clic
+  de vis.gl sont convertis par `toGoogleMouseEvent`. API publique et méthodes de la ref inchangées.
+- `AdvancedMarker.tsx`, `marker.web.tsx`, `callout.tsx` : `useMap()` au lieu du contexte de
+  l'ancienne bibliothèque ; callout classique sur l'`InfoWindow` de vis.gl, callout `tooltip` sur
+  `overlay-view.tsx` (un `google.maps.OverlayView` minimal qui empêche les clics d'atteindre la
+  carte).
+- `polygon.tsx`, `polyline.tsx`, `circle.tsx` : composants vis.gl ; `Polygon` appelle enfin
+  `onPress`.
+- `heat-map.tsx` supprimé : jamais exporté, et la couche de visualisation de Google est dépréciée.
+- `@types/google.maps` et `@types/react-dom` passent en dépendances : gward-app compile les sources
+  du fork et ne trouvait les types `google` que par `@react-google-maps/api`. Le point d'entrée web
+  référence `google.maps`.
+
+### Effet sur gward-app
+
+`@react-google-maps/api` et sa dépendance `@googlemaps/markerclusterer` disparaissent : il ne reste
+qu'une copie de `supercluster` (9.1.0).
+
+### Vérifications et limites
+
+- `yarn check` du fork : lint, typecheck, 27 tests.
+- `tsc` et export web de gward-app (budgets compris) avec ce code installé.
+- Testé par le propriétaire sur le web : carte et style (Map ID), marqueurs, callouts, zoom par
+  les boutons et la molette, déplacement dès le premier appui, appui sur la carte dans l'ajout d'un
+  lieu, console sans erreur.
+- **Non testé** (non utilisé par gward-app) : polygones, polylignes, cercles, GeoJSON, clusters,
+  position de l'utilisateur, callouts `tooltip`.
 
 ## 17 octobre 2026 — React Native 0.88, React 19.3, TypeScript 6, supercluster 9 et alignement sur gward-app
 

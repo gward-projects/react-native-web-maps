@@ -1,21 +1,22 @@
 import type { ForwardedRef } from 'react';
-import React, { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, { forwardRef, memo, useCallback, useEffect, useEffectEvent, useId, useImperativeHandle, useMemo, useState } from 'react';
 import type { Address, Camera, EdgePadding, SnapshotOptions } from 'react-native-maps';
-import { GoogleMap, type Libraries, useJsApiLoader } from '@react-google-maps/api';
+import { APIProvider, Map as GoogleMap, useApiIsLoaded, useMap } from '@vis.gl/react-google-maps';
 import { LatLng, Point, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import type RNMapView from 'react-native-maps';
 
 import { logDeprecationWarning, logMethodNotImplementedWarning } from '../utils/log';
-import { mapMouseEventToMapEvent } from '../utils/mouse-event';
+import { mapMouseEventToMapEvent, toGoogleMouseEvent } from '../utils/mouse-event';
 import { MapViewProps } from '../override-types';
 import { transformRNCameraObject } from '../utils/camera';
 import { UserLocationMarker } from './user-location-marker';
 import { useUserLocation } from '../hooks/use-user-location';
 
-const LIBRARIES: Libraries = ['marker'];
+// The marker library provides the advanced markers (AdvancedMarker.tsx).
+const LIBRARIES = ['marker'];
 
-function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
+function MapViewContent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
   const {
     customMapStyle,
     followsUserLocation,
@@ -41,11 +42,12 @@ function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapVi
 
   // State
 
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  // Identifies this map in the APIProvider, so that useMap returns its instance.
+  const mapId = useId();
+  const map = useMap(mapId);
   const [isGesture, setIsGesture] = useState<boolean>(false);
-  // Computed once: GoogleMap calls setCenter whenever this object changes, and a setCenter
-  // cancels the drag in progress. With a new center on each render, the render triggered by
-  // onDragStart cancelled the drag that had just started.
+  // The map is uncontrolled: these values only set its initial camera, so a render never moves
+  // it (a controlled center used to cancel a drag started by the same press).
   const [initialCenter] = useState<google.maps.LatLngLiteral>(() => ({
     lat: initialCamera?.center.latitude || initialRegion?.latitude || 0,
     lng: initialCamera?.center.longitude || initialRegion?.longitude || 0,
@@ -59,20 +61,16 @@ function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapVi
     followUserLocation: props.followsUserLocation || false,
   });
 
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: props.googleMapsApiKey || '',
-    libraries: LIBRARIES,
-  });
+  const isLoaded = useApiIsLoaded();
 
   // Callbacks
 
-  const _onMapReady = useCallback(
-    (_map: google.maps.Map) => {
-      setMap(_map);
-      onMapReady?.();
-    },
-    [onMapReady],
-  );
+  // An effect event: a new onMapReady from the parent must not report the map ready again.
+  const notifyMapReady = useEffectEvent(() => onMapReady?.());
+
+  useEffect(() => {
+    if (map) notifyMapReady();
+  }, [map]);
 
   const _onDragStart = useCallback(() => {
     setIsGesture(true);
@@ -298,14 +296,15 @@ function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapVi
   const mapNode = useMemo(
     () => (
       <GoogleMap
-        onLoad={_onMapReady}
+        id={mapId}
+        style={{ flex: 1 }}
+        defaultCenter={initialCenter}
+        defaultZoom={initialCamera?.zoom || 3}
+        defaultHeading={initialCamera?.heading}
+        defaultTilt={initialCamera?.pitch}
         onBoundsChanged={_onRegionChange}
-        onDragStart={_onDragStart}
-        onDragEnd={_onRegionChangeComplete}
-        mapContainerStyle={{ flex: 1 }}
-        zoom={initialCamera?.zoom || 3}
-        heading={initialCamera?.heading}
-        tilt={initialCamera?.pitch}
+        onDragstart={_onDragStart}
+        onDragend={_onRegionChangeComplete}
         onDrag={() => {
           const center = map?.getCenter();
 
@@ -319,36 +318,31 @@ function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapVi
           );
         }}
         onClick={(e) =>
-          onPress?.(mapMouseEventToMapEvent(e, null, map, 'press'))
+          onPress?.(mapMouseEventToMapEvent(toGoogleMouseEvent(e), null, map, 'press'))
         }
-        onDblClick={(e) =>
-          onDoublePress?.(mapMouseEventToMapEvent(e, null, map, 'press'))
+        onDblclick={(e) =>
+          onDoublePress?.(mapMouseEventToMapEvent(toGoogleMouseEvent(e), null, map, 'press'))
         }
-        center={initialCenter}
-        options={{
-          scrollwheel: zoomEnabled,
-          disableDoubleClickZoom: !zoomTapEnabled,
-          zoomControl: zoomControlEnabled,
-          rotateControl: rotateEnabled,
-          minZoom: minZoomLevel, // TODO: Normalize value
-          maxZoom: maxZoomLevel, // TODO: Normalize value
-          scaleControl: showsScale,
-          styles: customMapStyle,
-          mapId: googleMapsMapId,
-          ...(options || {}),
-        }}
+        scrollwheel={zoomEnabled}
+        disableDoubleClickZoom={!zoomTapEnabled}
+        zoomControl={zoomControlEnabled}
+        rotateControl={rotateEnabled}
+        minZoom={minZoomLevel} // TODO: Normalize value
+        maxZoom={maxZoomLevel} // TODO: Normalize value
+        scaleControl={showsScale}
+        styles={customMapStyle}
+        mapId={googleMapsMapId}
+        // vis.gl types colorScheme and renderingType with its own enums, of the same values.
+        {...(options as Omit<google.maps.MapOptions, 'colorScheme' | 'renderingType'>)}
       >
-        <>
-          {showsUserLocation && userLocation && (
-            <UserLocationMarker coordinates={userLocation.coords} />
-          )}
-          {props.children}
-        </>
+        {showsUserLocation && userLocation && (
+          <UserLocationMarker coordinates={userLocation.coords} />
+        )}
+        {props.children}
       </GoogleMap>
     ),
     [
       _onDragStart,
-      _onMapReady,
       _onRegionChange,
       _onRegionChangeComplete,
       customMapStyle,
@@ -356,6 +350,7 @@ function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapVi
       initialCamera,
       initialCenter,
       map,
+      mapId,
       maxZoomLevel,
       minZoomLevel,
       onDoublePress,
@@ -373,6 +368,12 @@ function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapVi
     ],
   );
 
+  return isLoaded ? mapNode : <>{props.loadingFallback || null}</>;
+}
+
+const MapViewWithRef = forwardRef(MapViewContent);
+
+function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
   if (props.provider !== 'google') {
     console.warn(
       '[WARNING] `react-native-web-maps` only suppots google for now. Please pass "google" as provider in props',
@@ -381,10 +382,10 @@ function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapVi
     return null;
   }
 
-  return isLoaded ? (
-    React.cloneElement(mapNode)
-  ) : (
-    <>{props.loadingFallback || null}</>
+  return (
+    <APIProvider apiKey={props.googleMapsApiKey || ''} libraries={LIBRARIES}>
+      <MapViewWithRef {...props} ref={ref} />
+    </APIProvider>
   );
 }
 

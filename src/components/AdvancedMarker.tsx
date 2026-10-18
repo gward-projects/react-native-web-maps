@@ -9,14 +9,13 @@ import React, {
   type ReactNode,
   type Ref,
   useCallback,
-  useContext,
   useEffect,
   useImperativeHandle,
   useMemo,
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { MapContext } from '@react-google-maps/api';
+import { useMap } from '@vis.gl/react-google-maps';
 
 import { Callout } from './callout';
 
@@ -57,7 +56,7 @@ function useAdvancedMarker(props: AdvancedMarkerProps) {
   const [contentContainer, setContentContainer] =
     useState<HTMLDivElement | null>(null);
 
-  const map = useContext(MapContext);
+  const map = useMap();
   const markerLibrary = google.maps.marker;
 
   const {

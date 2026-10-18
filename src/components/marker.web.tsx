@@ -1,6 +1,6 @@
 import React from 'react';
 import type { MapMarkerProps, Point } from 'react-native-maps';
-import { useGoogleMap } from '@react-google-maps/api';
+import { useMap } from '@vis.gl/react-google-maps';
 
 import { AdvancedMarker } from './AdvancedMarker';
 import { CalloutContext } from './callout';
@@ -49,7 +49,7 @@ interface MarkerFProps extends MapMarkerProps {
 }
 
 function MarkerF(props: MarkerFProps) {
-  const map = useGoogleMap();
+  const map = useMap();
 
 
   const onMarkerPress = () => {

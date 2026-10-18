@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { InfoWindow as GMInfoWindow, OverlayView as GMOverlayView, useGoogleMap } from '@react-google-maps/api';
+import { InfoWindow as GMInfoWindow, useMap } from '@vis.gl/react-google-maps';
 import type { LatLng, MapCalloutProps, Point } from 'react-native-maps';
 
 import { mapMouseEventToMapEvent } from '../utils/mouse-event';
+import { OverlayView } from './overlay-view';
 
 export type CalloutContextType = {
   coordinate: LatLng;
@@ -22,7 +23,7 @@ export const CalloutContext = React.createContext<CalloutContextType>({
 });
 
 export function Callout(props: MapCalloutProps) {
-  const map = useGoogleMap();
+  const map = useMap();
 
   const {
     coordinate,
@@ -48,31 +49,25 @@ export function Callout(props: MapCalloutProps) {
       }}
     >
       {props.tooltip ? (
-        <GMOverlayView
-          mapPaneName="overlayMouseTarget"
+        <OverlayView
           position={{
             lat: Number(coordinate.latitude),
             lng: Number(coordinate.longitude),
           }}
-          getPixelPositionOffset={() => ({
-            x: xOffset,
-            y: yOffset,
-          })}
+          offset={{ x: xOffset, y: yOffset }}
         >
           {/* Render on top of marker instead of inside */}
           <div style={{ transform: 'translate(-50%,-100%)' }}>
             {props.children}
           </div>
-        </GMOverlayView>
+        </OverlayView>
       ) : (
         <GMInfoWindow
           position={{
             lat: Number(coordinate.latitude),
             lng: Number(coordinate.longitude),
           }}
-          options={{
-            pixelOffset: new google.maps.Size(xOffset, yOffset),
-          }}
+          pixelOffset={[xOffset, yOffset]}
           onCloseClick={() => toggleCalloutVisible()}
         >
           <>{props.children}</>

@@ -1,11 +1,11 @@
 import React from 'react';
 import type { MapPolylineProps } from 'react-native-maps';
-import { Polyline as GMPolyline, useGoogleMap } from '@react-google-maps/api';
+import { Polyline as GMPolyline, useMap } from '@vis.gl/react-google-maps';
 
 import { mapMouseEventToMapEvent } from '../utils/mouse-event';
 
 export function Polyline(props: MapPolylineProps) {
-  const map = useGoogleMap();
+  const map = useMap();
 
   return (
     <GMPolyline
@@ -16,12 +16,10 @@ export function Polyline(props: MapPolylineProps) {
       onClick={(e) =>
         props.onPress?.(mapMouseEventToMapEvent(e, null, map, 'polyline-press'))
       }
-      options={{
-        geodesic: props.geodesic,
-        clickable: props.tappable,
-        strokeColor: props.strokeColor,
-        strokeWeight: props.strokeWidth,
-      }}
+      geodesic={props.geodesic}
+      clickable={props.tappable}
+      strokeColor={props.strokeColor}
+      strokeWeight={props.strokeWidth}
     />
   );
 }
