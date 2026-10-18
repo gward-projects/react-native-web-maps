@@ -29,7 +29,7 @@ sans différence à analyser ne nécessite pas d'entrée.
 | `@react-google-maps/api` | 2.20.8 | retiré |
 | `@vis.gl/react-google-maps` | — | 1.10.1 |
 | `@types/google.maps` | via `@react-google-maps/api` (3.58.1) | 3.66.7, dépendance directe |
-| `@types/react-dom` | 19.3.0 (développement) | 19.3.0, dépendance livrée |
+| `@types/react-dom` | 19.3.0 (développement) | 19.2.7, dépendance livrée |
 
 `@vis.gl/react-google-maps` est maintenu par l'équipe vis.gl (OpenJS Foundation) avec Google, et
 gère nativement les Advanced Markers ; `@react-google-maps/api` évoluait peu. Version 1.10.1 du
@@ -51,7 +51,8 @@ gère nativement les Advanced Markers ; `@react-google-maps/api` évoluait peu. 
 - `heat-map.tsx` supprimé : jamais exporté, et la couche de visualisation de Google est dépréciée.
 - `@types/google.maps` et `@types/react-dom` passent en dépendances : gward-app compile les sources
   du fork et ne trouvait les types `google` que par `@react-google-maps/api`. Le point d'entrée web
-  référence `google.maps`.
+  référence `google.maps`. `@types/react-dom` reste en 19.2.x (0.11.1) : la 19.3 exige
+  `@types/react` ^19.3, que gward-app n'a pas encore.
 
 ### Effet sur gward-app
 
