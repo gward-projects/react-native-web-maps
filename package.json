@@ -1,6 +1,6 @@
 {
   "name": "react-native-web-maps",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "Cross platform maps for react & react-native",
   "main": "src/index.web.tsx",
   "files": [
@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@types/google.maps": "3.66.7",
-    "@types/react-dom": "19.2.7",
+    "@types/react-dom": "19.3.0",
     "@vis.gl/react-google-maps": "1.10.1",
     "supercluster": "9.1.0"
   }
