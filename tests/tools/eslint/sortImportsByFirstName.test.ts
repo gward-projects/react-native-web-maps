@@ -5,7 +5,7 @@ import {Linter} from "eslint";
 
 import rule from "../../../tools/eslint/sortImportsByFirstName";
 
-// Copied from gward-app (tests/tools/eslint/sortImportsByFirstName.test.ts): keep both in sync.
+// Copied from gward-app: keep both in sync.
 
 const config: Linter.Config[] = [{
     plugins: {gward: {rules: {"sort-imports-by-first-name": rule}}},

@@ -4,7 +4,7 @@ import {spawn} from "node:child_process";
 
 import {runStaticChecks} from "./staticChecks";
 
-// Same guard as gward-app (tools/checks/check.ts), without its web export and
+// Same guard as gward-app, without its web export and
 // bundle budgets: lint and typecheck in parallel, then the tests.
 type CheckScript = "test";
 type CheckRunner = (script: CheckScript) => Promise<number>;

@@ -9,7 +9,7 @@
  * in place; any other comment above an import moves with it, as does a `@ts-…` or
  * `eslint-…` directive above the first import.
  *
- * Copied from gward-app (tools/eslint/sortImportsByFirstName.js): keep both in sync.
+ * Copied from gward-app: keep both in sync.
  */
 
 import type {ImportDeclaration, Program} from "estree";

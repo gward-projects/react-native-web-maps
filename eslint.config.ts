@@ -3,7 +3,7 @@ import expoConfig from "eslint-config-expo/flat";
 
 import sortImportsByFirstName from "./tools/eslint/sortImportsByFirstName";
 
-// Same rules as gward-app (eslint.config.js), minus its project-specific import restrictions.
+// Same rules as gward-app, minus its project-specific import restrictions.
 export default defineConfig([
     globalIgnores([".yarn/**"]),
     expoConfig,

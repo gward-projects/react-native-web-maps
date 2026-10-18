@@ -2,8 +2,8 @@
 
 **Nature :** historique vivant des revues de versions · **Dernière mise à jour :** 18 octobre 2026.
 
-Ce fichier suit les mêmes règles que le journal de gward-app
-(`documentation/journal-mises-a-jour-dependances.md`), dont il reprend le format.
+Ce fichier suit les mêmes règles que le journal des dépendances de gward-app, dont il reprend le
+format.
 
 ## Règles de tenue
 
@@ -18,8 +18,8 @@ indiquant :
   dans le navigateur.
 
 Chaque correctif annoncé comme un apport doit être rattaché à la version exacte qui le porte, en
-comparant les archives npm et les commits amont (voir « Vérifier les changements réels » dans
-`documentation/procedures/agents/mettre-a-jour-dependances.md` de gward-app). Une simple montée
+comparant les archives npm et les commits amont (voir la procédure de
+montée des dépendances de gward-app). Une simple montée
 sans différence à analyser ne nécessite pas d'entrée.
 
 ## 18 octobre 2026 — Passage de @react-google-maps/api à @vis.gl/react-google-maps
@@ -54,8 +54,8 @@ gère nativement les Advanced Markers ; `@react-google-maps/api` évoluait peu. 
   (`anchorLeft`/`anchorTop` à `-50%`, comme l'ancien `translate(0, 50%)`), épingle par défaut ancrée
   par le bas, `Callout` rendus à côté du marqueur. Testé sur le web par le propriétaire.
 - `callout.tsx` (0.11.4) : `pixelOffset` mémorisé. L'`InfoWindow` de vis.gl ferme et rouvre la
-  fenêtre dès que ce tableau change (comparaison par identité) ; un nouveau tableau à chaque rendu la
-  rouvrait donc à chaque rendu, et l'ouverture recadrait la carte (autopan), ce qui annulait un
+  fenêtre dès que ce tableau change (comparaison par identité) ; un nouveau tableau à chaque rendu
+  la rouvrait donc à chaque rendu, et l'ouverture recadrait la carte (autopan), ce qui annulait un
   déplacement commencé au même moment (par exemple au retour sur la carte, quand l'écran se
   redessine). Testé sur le web par le propriétaire.
 - `@types/google.maps` et `@types/react-dom` passent en dépendances : gward-app compile les sources

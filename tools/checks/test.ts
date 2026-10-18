@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {spawnSync} from "node:child_process";
 
-// Same runner as gward-app (tools/checks/test.ts), with a single group: the tests
+// Same runner as gward-app, with a single group: the tests
 // live in tests/ and mirror the sources (src/utils/region.ts is tested by
 // tests/src/utils/region.test.ts).
 const TESTS_ROOT = "tests";
