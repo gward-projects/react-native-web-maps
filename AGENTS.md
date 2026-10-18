@@ -114,6 +114,11 @@ imports de types avec les modules du projet.
   même appui. Ne pas repasser de props de caméra contrôlées à `Map` ; la déplacer depuis le code
   passe par les méthodes de la ref (`animateToRegion`, etc.) ;
 - `Polygon` appelle `onPress`, que l'amont calculait sans l'appeler ;
+- `onRegionChange` et `onRegionChangeComplete` ne signalent rien tant que la carte n'a pas de
+  taille : masquée en `display: none` (écran gardé dans une pile de navigation), elle reçoit
+  encore des `bounds_changed` de Google, mesurés à 0 × 0, donc une région vide. Transmise à l'app
+  puis réutilisée par `animateToRegion`, cette région portait la carte au zoom maximal, sans tuile
+  (carte grise ; constaté dans gward-app le 18 octobre 2026) ;
 - `@types/google.maps` et `@types/react-dom` sont des dépendances livrées : gward-app compile les
   sources du fork (dont `callout.tsx` et `overlay-view.tsx`), et le point d'entrée web référence
   les types `google.maps`.

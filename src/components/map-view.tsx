@@ -16,6 +16,42 @@ import { useUserLocation } from '../hooks/use-user-location';
 // Loaded upfront for the advanced markers (marker.web.tsx).
 const LIBRARIES = ['marker'];
 
+// A map hidden with display: none (for instance a screen kept in a navigation stack) has no
+// visible region: Google still fires bounds_changed while measuring it at 0 x 0, with an empty
+// region. Reporting it would hand the app an empty region, and animating back to it zooms the
+// map to its maximum level, where Google has no tile (grey map).
+const hasSize = (map: google.maps.Map) => map.getDiv().clientWidth > 0 && map.getDiv().clientHeight > 0;
+
+// Google does not watch the size of the map container. Once it has measured a hidden map at 0 x 0
+// (for instance when a marker is added to it), it keeps that empty viewport after the map is
+// shown again: a camera change then loads no tile (grey map, empty info windows). It measures the
+// container again on its own shortly after, without repainting.
+const hasStaleViewport = (map: google.maps.Map) => {
+  const span = map.getBounds()?.toSpan();
+  return hasSize(map) && (!span || (span.lat() === 0 && span.lng() === 0));
+};
+
+// Upper bound for waiting on Google, in case it never measures the container again.
+const STALE_VIEWPORT_TIMEOUT_MS = 5000;
+
+/**
+ * Runs the action once Google knows the real size of the map, right away when it already does.
+ *
+ * @param map map to wait for
+ * @param action camera change or repaint that needs the real viewport
+ */
+const whenViewportKnown = (map: google.maps.Map, action: () => void) => {
+  const start = performance.now();
+  const check = () => {
+    if (!hasStaleViewport(map) || performance.now() - start > STALE_VIEWPORT_TIMEOUT_MS) {
+      action();
+      return;
+    }
+    requestAnimationFrame(check);
+  };
+  check();
+};
+
 function MapViewContent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
   const {
     customMapStyle,
@@ -78,7 +114,7 @@ function MapViewContent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView
 
   const _onRegionChange = useCallback(() => {
     const bounds = map?.getBounds();
-    if (bounds) {
+    if (map && bounds && hasSize(map)) {
       const northEast = bounds.getNorthEast();
       const southWest = bounds.getSouthWest();
       const longitudeDelta = Math.abs(northEast.lng() - southWest.lng());
@@ -98,7 +134,7 @@ function MapViewContent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView
 
   const _onRegionChangeComplete = useCallback(() => {
     const bounds = map?.getBounds();
-    if (bounds) {
+    if (map && bounds && hasSize(map)) {
       const northEast = bounds.getNorthEast();
       const southWest = bounds.getSouthWest();
       const longitudeDelta = Math.abs(northEast.lng() - southWest.lng());
@@ -116,6 +152,24 @@ function MapViewContent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView
     }
     setIsGesture(false);
   }, [map, onRegionChangeComplete, isGesture]);
+
+  // Repaints a map shown again whose viewport Google measured while it was hidden.
+  useEffect(() => {
+    if (!map) return;
+    let wasVisible = true;
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = entry?.isIntersecting ?? false;
+      if (isVisible && !wasVisible && hasStaleViewport(map)) {
+        whenViewportKnown(map, () => {
+          const center = map.getCenter();
+          if (center) map.setCenter(center);
+        });
+      }
+      wasVisible = isVisible;
+    });
+    observer.observe(map.getDiv());
+    return () => observer.disconnect();
+  }, [map]);
 
   // Ref handle
 
@@ -183,7 +237,7 @@ function MapViewContent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView
 
         // panToBounds not working??
         // map?.panToBounds(bounds);
-        map?.fitBounds(bounds);
+        if (map) whenViewportKnown(map, () => map.fitBounds(bounds));
       },
       fitToCoordinates(
         coordinates?: LatLng[],
