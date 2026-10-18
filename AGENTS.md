@@ -102,7 +102,10 @@ imports de types avec les modules du projet.
   (`@types/supercluster` retiré) ;
 - `docs/` (site Docusaurus), `babel.config.js`, `tsconfig.build.json` et
   `react-native-builder-bob` ont été supprimés ;
-- dépendances des hooks corrigées (voir le journal du 17 octobre 2026).
+- dépendances des hooks corrigées (voir le journal du 17 octobre 2026) ;
+- `map-view.tsx` : le centre passé à `GoogleMap` est calculé une seule fois. Un nouvel objet à
+  chaque rendu faisait appeler `setCenter`, qui annulait un déplacement à la souris commencé par le
+  même appui (le rendu déclenché par `onDragStart` l'interrompait).
 
 ## Dépendances
 

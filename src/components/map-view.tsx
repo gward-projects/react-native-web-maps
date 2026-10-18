@@ -43,6 +43,13 @@ function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapVi
 
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isGesture, setIsGesture] = useState<boolean>(false);
+  // Computed once: GoogleMap calls setCenter whenever this object changes, and a setCenter
+  // cancels the drag in progress. With a new center on each render, the render triggered by
+  // onDragStart cancelled the drag that had just started.
+  const [initialCenter] = useState<google.maps.LatLngLiteral>(() => ({
+    lat: initialCamera?.center.latitude || initialRegion?.latitude || 0,
+    lng: initialCamera?.center.longitude || initialRegion?.longitude || 0,
+  }));
 
   const userLocation = useUserLocation({
     showUserLocation: props.showsUserLocation || false,
@@ -317,20 +324,7 @@ function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapVi
         onDblClick={(e) =>
           onDoublePress?.(mapMouseEventToMapEvent(e, null, map, 'press'))
         }
-        center={
-          map
-            ? map.getCenter()
-            : {
-              lat:
-                initialCamera?.center.latitude ||
-                initialRegion?.latitude ||
-                0,
-              lng:
-                initialCamera?.center.longitude ||
-                initialRegion?.longitude ||
-                0,
-            }
-        }
+        center={initialCenter}
         options={{
           scrollwheel: zoomEnabled,
           disableDoubleClickZoom: !zoomTapEnabled,
@@ -360,7 +354,7 @@ function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapVi
       customMapStyle,
       googleMapsMapId,
       initialCamera,
-      initialRegion,
+      initialCenter,
       map,
       maxZoomLevel,
       minZoomLevel,
