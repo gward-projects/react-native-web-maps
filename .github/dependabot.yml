@@ -1,0 +1,21 @@
+# Veille des nouvelles versions, comme dans gward-app mais mensuelle : les PR signalent
+# qu'une version est sortie, la montée se fait à la main (voir AGENTS.md, « Dépendances »).
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/" # racine
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    rebase-strategy: "auto"
+    groups:
+      security-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+          - "minor"
+          - "major"

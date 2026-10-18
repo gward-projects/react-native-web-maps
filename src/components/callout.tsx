@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { InfoWindow as GMInfoWindow, OverlayView as GMOverlayView, useGoogleMap } from '@react-google-maps/api';
 import type { LatLng, MapCalloutProps, Point } from 'react-native-maps';
+
 import { mapMouseEventToMapEvent } from '../utils/mouse-event';
 
 export type CalloutContextType = {

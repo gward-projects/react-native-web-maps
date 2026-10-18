@@ -1,5 +1,5 @@
-import type { MapViewProps as RNMapViewProps } from 'react-native-maps';
 import { JSX } from 'react';
+import type { MapViewProps as RNMapViewProps } from 'react-native-maps';
 
 /**
  * Overrides MapView props to include additional web-specific props

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Polyline as GMPolyline, useGoogleMap } from '@react-google-maps/api';
 import type { MapPolylineProps } from 'react-native-maps';
+import { Polyline as GMPolyline, useGoogleMap } from '@react-google-maps/api';
+
 import { mapMouseEventToMapEvent } from '../utils/mouse-event';
 
 export function Polyline(props: MapPolylineProps) {

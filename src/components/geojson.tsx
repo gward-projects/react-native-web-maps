@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { GeojsonProps } from 'react-native-maps';
+
 import { getColor, getStrokeWidth, makeOverlays } from '../utils/geojson';
 import { Marker } from './marker';
 import { Polygon } from './polygon';

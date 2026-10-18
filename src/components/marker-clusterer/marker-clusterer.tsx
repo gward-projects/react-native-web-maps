@@ -1,20 +1,26 @@
-import type { ClusterProps, MarkerClustererProps } from './types';
 import React, { JSX, memo, type ReactElement, useMemo, useState } from 'react';
-import { getBoundByRegion } from '../../utils/region';
 import type { MapMarkerProps } from 'react-native-maps';
+import Supercluster, {
+  type AnyProps,
+  type ClusterFeature,
+  type ClusterProperties,
+  type PointFeature,
+} from 'supercluster';
+
 import { Cluster } from './cluster';
-import Supercluster from 'supercluster';
+import type { ClusterProps, MarkerClustererProps } from './types';
+import { getBoundByRegion } from '../../utils/region';
 import { Marker } from '../marker';
 
-type ClusterType = (Supercluster.PointFeature<{
+type ClusterType = (PointFeature<{
   node: JSX.Element
   cluster: boolean
-}> | Supercluster.ClusterFeature<Supercluster.AnyProps>);
+}> | ClusterFeature<AnyProps>);
 
-function _MarkerClusterer(props: MarkerClustererProps) {
-  const [supercluster, _setSupercluster] = useState<
-    Supercluster<{ node: JSX.Element; cluster: boolean }>
-  >(new Supercluster());
+function MarkerClustererComponent(props: MarkerClustererProps) {
+  const [supercluster] = useState(
+    () => new Supercluster<{ node: JSX.Element; cluster: boolean }>(),
+  );
 
   const markers = useMemo(
     () =>
@@ -25,7 +31,7 @@ function _MarkerClusterer(props: MarkerClustererProps) {
   );
 
   const points = useMemo<
-    Supercluster.PointFeature<{ node: JSX.Element; cluster: boolean }>[]
+    PointFeature<{ node: JSX.Element; cluster: boolean }>[]
   >(
     () =>
       markers.map((node) => ({
@@ -53,13 +59,13 @@ function _MarkerClusterer(props: MarkerClustererProps) {
       bbox,
       Math.round(Math.log(360 / props.region.longitudeDelta) / Math.LN2),
     );
-  }, [props.region, points]);
+  }, [props.region, points, supercluster]);
 
   return (
     <>
       {clusters.map((feature: ClusterType, idx: number) => {
         const clusterProperties =
-          feature.properties as Supercluster.ClusterProperties;
+          feature.properties as ClusterProperties;
 
         const clusterProps: ClusterProps = {
           expansionZoom: supercluster.getClusterExpansionZoom(
@@ -87,4 +93,4 @@ function _MarkerClusterer(props: MarkerClustererProps) {
   );
 }
 
-export const MarkerClusterer = memo(_MarkerClusterer);
+export const MarkerClusterer = memo(MarkerClustererComponent);

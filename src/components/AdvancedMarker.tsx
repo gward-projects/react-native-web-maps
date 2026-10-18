@@ -1,6 +1,5 @@
 // Based on https://github.dev/visgl/react-google-maps because the original package is not maintained anymore and misses advanced markers
 
-/* eslint-disable complexity */
 import React, {
   Children,
   forwardRef,
@@ -16,9 +15,9 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-
 import { createPortal } from 'react-dom';
 import { MapContext } from '@react-google-maps/api';
+
 import { Callout } from './callout';
 
 export interface AdvancedMarkerContextValue {
@@ -89,6 +88,9 @@ function useAdvancedMarker(props: AdvancedMarkerProps) {
     const newMarker = new markerLibrary.AdvancedMarkerElement();
     newMarker.map = map;
 
+    // The marker is an imperative Google Maps object: it can only be created once
+    // the map exists, so it is created here and kept in state for the other effects.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMarker(newMarker);
 
     // create container for marker content if there are children
@@ -111,6 +113,8 @@ function useAdvancedMarker(props: AdvancedMarkerProps) {
     // because that causes a short flickering of the marker.
     // The className update is handled in the useEffect below.
     // Excluding the className from the dependency array onm purpose here
+    // (anchorAbove only sets the initial transform, likewise).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, markerLibrary, isEmpty]);
 
   useEffect(() => {

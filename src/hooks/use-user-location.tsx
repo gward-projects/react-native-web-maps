@@ -1,5 +1,5 @@
+import { useEffect, useEffectEvent, useState } from 'react';
 import * as Location from 'expo-location';
-import { useCallback, useEffect, useState } from 'react';
 import type { UserLocationChangeEvent } from 'react-native-maps';
 
 interface UseUserLocationOptions {
@@ -11,20 +11,19 @@ interface UseUserLocationOptions {
 }
 
 export function useUserLocation(options: UseUserLocationOptions) {
+  const { followUserLocation, onUserLocationChange } = options;
   const [location, setLocation] = useState<Location.LocationObject>();
-
-  const [watchPositionSubscription, setWatchPositionSubscription] =
-    useState<Location.LocationSubscription>();
 
   const [permission] = Location.useForegroundPermissions({
     request: options.requestPermission,
     get: options.showUserLocation,
   });
 
-  const handleLocationChange = useCallback(
-    function(e: Location.LocationObject) {
+  // An effect event: a new onUserLocationChange must not restart the position watch.
+  const handleLocationChange = useEffectEvent(
+    (e: Location.LocationObject) => {
       setLocation(e);
-      options.onUserLocationChange?.({
+      onUserLocationChange?.({
         nativeEvent: {
           coordinate: {
             ...e.coords,
@@ -38,21 +37,33 @@ export function useUserLocation(options: UseUserLocationOptions) {
         },
       } as unknown as UserLocationChangeEvent);
     },
-    [options.onUserLocationChange],
   );
 
-  useEffect(() => {
-    if (permission?.granted && options.followUserLocation) {
-      Location.getCurrentPositionAsync().then(handleLocationChange);
-      // Watch position
-      Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.Balanced },
-        handleLocationChange,
-      ).then(setWatchPositionSubscription);
-    }
+  const granted = permission?.granted ?? false;
 
-    return () => watchPositionSubscription?.remove();
-  }, [permission, options.followUserLocation]);
+  useEffect(() => {
+    if (!granted || !followUserLocation) return;
+
+    // The subscription arrives asynchronously: remove it at once if the effect
+    // was cleaned up in the meantime.
+    let subscription: Location.LocationSubscription | undefined;
+    let cleanedUp = false;
+
+    Location.getCurrentPositionAsync().then((e) => handleLocationChange(e));
+    // Watch position
+    Location.watchPositionAsync(
+      { accuracy: Location.Accuracy.Balanced },
+      (e) => handleLocationChange(e),
+    ).then((watch) => {
+      if (cleanedUp) watch.remove();
+      else subscription = watch;
+    });
+
+    return () => {
+      cleanedUp = true;
+      subscription?.remove();
+    };
+  }, [granted, followUserLocation]);
 
   return location;
 }

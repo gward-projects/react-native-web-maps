@@ -1,20 +1,44 @@
-import { GoogleMap, type Libraries, useJsApiLoader } from '@react-google-maps/api';
 import type { ForwardedRef } from 'react';
 import React, { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import type RNMapView from 'react-native-maps';
 import type { Address, Camera, EdgePadding, SnapshotOptions } from 'react-native-maps';
+import { GoogleMap, type Libraries, useJsApiLoader } from '@react-google-maps/api';
 import { LatLng, Point, Region } from 'react-native-maps';
-import { MapViewProps } from '../override-types';
-import { mapMouseEventToMapEvent } from '../utils/mouse-event';
-import { transformRNCameraObject } from '../utils/camera';
-import { logDeprecationWarning, logMethodNotImplementedWarning } from '../utils/log';
-import { useUserLocation } from '../hooks/use-user-location';
-import { UserLocationMarker } from './user-location-marker';
 import * as Location from 'expo-location';
+import type RNMapView from 'react-native-maps';
+
+import { logDeprecationWarning, logMethodNotImplementedWarning } from '../utils/log';
+import { mapMouseEventToMapEvent } from '../utils/mouse-event';
+import { MapViewProps } from '../override-types';
+import { transformRNCameraObject } from '../utils/camera';
+import { UserLocationMarker } from './user-location-marker';
+import { useUserLocation } from '../hooks/use-user-location';
 
 const LIBRARIES: Libraries = ['marker'];
 
-function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
+function MapViewComponent(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
+  const {
+    customMapStyle,
+    followsUserLocation,
+    googleMapsMapId,
+    initialCamera,
+    initialRegion,
+    maxZoomLevel,
+    minZoomLevel,
+    onDoublePress,
+    onMapReady,
+    onPanDrag,
+    onPress,
+    onRegionChange,
+    onRegionChangeComplete,
+    options,
+    rotateEnabled,
+    showsScale,
+    showsUserLocation,
+    zoomControlEnabled,
+    zoomEnabled,
+    zoomTapEnabled,
+  } = props;
+
   // State
 
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -38,9 +62,9 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
   const _onMapReady = useCallback(
     (_map: google.maps.Map) => {
       setMap(_map);
-      props.onMapReady?.();
+      onMapReady?.();
     },
-    [map, props.onMapReady],
+    [onMapReady],
   );
 
   const _onDragStart = useCallback(() => {
@@ -55,7 +79,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
       const longitudeDelta = Math.abs(northEast.lng() - southWest.lng());
       const latitudeDelta = Math.abs(northEast.lat() - southWest.lat());
       const center = bounds.getCenter();
-      props.onRegionChange?.(
+      onRegionChange?.(
         {
           latitude: center.lat(),
           longitude: center.lng(),
@@ -65,7 +89,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
         { isGesture },
       );
     }
-  }, [map, props.onRegionChange, isGesture]);
+  }, [map, onRegionChange, isGesture]);
 
   const _onRegionChangeComplete = useCallback(() => {
     const bounds = map?.getBounds();
@@ -75,7 +99,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
       const longitudeDelta = Math.abs(northEast.lng() - southWest.lng());
       const latitudeDelta = Math.abs(northEast.lat() - southWest.lat());
       const center = bounds.getCenter();
-      props.onRegionChangeComplete?.(
+      onRegionChangeComplete?.(
         {
           latitude: center.lat(),
           longitude: center.lng(),
@@ -86,7 +110,7 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
       );
     }
     setIsGesture(false);
-  }, [map, props.onRegionChange, isGesture]);
+  }, [map, onRegionChangeComplete, isGesture]);
 
   // Ref handle
 
@@ -256,13 +280,13 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
   // Side effects
 
   useEffect(() => {
-    if (props.followsUserLocation && userLocation) {
+    if (followsUserLocation && userLocation) {
       map?.panTo({
         lat: userLocation.coords.latitude,
         lng: userLocation.coords.longitude,
       });
     }
-  }, [props.followsUserLocation, userLocation]);
+  }, [followsUserLocation, map, userLocation]);
 
   const mapNode = useMemo(
     () => (
@@ -272,13 +296,13 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
         onDragStart={_onDragStart}
         onDragEnd={_onRegionChangeComplete}
         mapContainerStyle={{ flex: 1 }}
-        zoom={props.initialCamera?.zoom || 3}
-        heading={props.initialCamera?.heading}
-        tilt={props.initialCamera?.pitch}
+        zoom={initialCamera?.zoom || 3}
+        heading={initialCamera?.heading}
+        tilt={initialCamera?.pitch}
         onDrag={() => {
           const center = map?.getCenter();
 
-          props.onPanDrag?.(
+          onPanDrag?.(
             mapMouseEventToMapEvent(
               null,
               center && { latitude: center.lat(), longitude: center.lng() },
@@ -288,40 +312,40 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
           );
         }}
         onClick={(e) =>
-          props.onPress?.(mapMouseEventToMapEvent(e, null, map, 'press'))
+          onPress?.(mapMouseEventToMapEvent(e, null, map, 'press'))
         }
         onDblClick={(e) =>
-          props.onDoublePress?.(mapMouseEventToMapEvent(e, null, map, 'press'))
+          onDoublePress?.(mapMouseEventToMapEvent(e, null, map, 'press'))
         }
         center={
           map
             ? map.getCenter()
             : {
               lat:
-                props.initialCamera?.center.latitude ||
-                props.initialRegion?.latitude ||
+                initialCamera?.center.latitude ||
+                initialRegion?.latitude ||
                 0,
               lng:
-                props.initialCamera?.center.longitude ||
-                props.initialRegion?.longitude ||
+                initialCamera?.center.longitude ||
+                initialRegion?.longitude ||
                 0,
             }
         }
         options={{
-          scrollwheel: props.zoomEnabled,
-          disableDoubleClickZoom: !props.zoomTapEnabled,
-          zoomControl: props.zoomControlEnabled,
-          rotateControl: props.rotateEnabled,
-          minZoom: props.minZoomLevel, // TODO: Normalize value
-          maxZoom: props.maxZoomLevel, // TODO: Normalize value
-          scaleControl: props.showsScale,
-          styles: props.customMapStyle,
-          mapId: props.googleMapsMapId,
-          ...(props.options || {}),
+          scrollwheel: zoomEnabled,
+          disableDoubleClickZoom: !zoomTapEnabled,
+          zoomControl: zoomControlEnabled,
+          rotateControl: rotateEnabled,
+          minZoom: minZoomLevel, // TODO: Normalize value
+          maxZoom: maxZoomLevel, // TODO: Normalize value
+          scaleControl: showsScale,
+          styles: customMapStyle,
+          mapId: googleMapsMapId,
+          ...(options || {}),
         }}
       >
         <>
-          {props.showsUserLocation && userLocation && (
+          {showsUserLocation && userLocation && (
             <UserLocationMarker coordinates={userLocation.coords} />
           )}
           {props.children}
@@ -329,24 +353,29 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
       </GoogleMap>
     ),
     [
-      _onRegionChange,
+      _onDragStart,
       _onMapReady,
+      _onRegionChange,
+      _onRegionChangeComplete,
+      customMapStyle,
+      googleMapsMapId,
+      initialCamera,
+      initialRegion,
+      map,
+      maxZoomLevel,
+      minZoomLevel,
+      onDoublePress,
+      onPanDrag,
+      onPress,
+      options,
+      props.children,
+      rotateEnabled,
+      showsScale,
+      showsUserLocation,
       userLocation,
-      props.initialCamera,
-      props.initialRegion,
-      props.showsUserLocation,
-      props.onPanDrag,
-      props.onPress,
-      props.onDoublePress,
-      props.zoomEnabled,
-      props.zoomTapEnabled,
-      props.zoomControlEnabled,
-      props.rotateEnabled,
-      props.minZoomLevel,
-      props.maxZoomLevel,
-      props.showsScale,
-      props.customMapStyle,
-      props.options,
+      zoomControlEnabled,
+      zoomEnabled,
+      zoomTapEnabled,
     ],
   );
 
@@ -365,4 +394,4 @@ function _MapView(props: MapViewProps, ref: ForwardedRef<Partial<RNMapView>>) {
   );
 }
 
-export const MapView = memo(forwardRef(_MapView));
+export const MapView = memo(forwardRef(MapViewComponent));

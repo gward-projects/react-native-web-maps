@@ -1,10 +1,11 @@
 import React from 'react';
-import { useGoogleMap } from '@react-google-maps/api';
 import type { MapMarkerProps, Point } from 'react-native-maps';
-import { createMarkerPressEvent, mapMouseEventToMapEvent } from '../utils/mouse-event';
-import type { CalloutContextType } from './callout';
-import { CalloutContext } from './callout';
+import { useGoogleMap } from '@react-google-maps/api';
+
 import { AdvancedMarker } from './AdvancedMarker';
+import { CalloutContext } from './callout';
+import type { CalloutContextType } from './callout';
+import { createMarkerPressEvent, mapMouseEventToMapEvent } from '../utils/mouse-event';
 
 interface MarkerState {
   calloutVisible: boolean;
@@ -26,7 +27,7 @@ export class Marker extends React.Component<MapMarkerProps, MarkerState> {
     this.setState({ calloutVisible: false });
   }
 
-  render(): React.ReactNode {
+  override render(): React.ReactNode {
     return (
       <MarkerF
         {...this.props}
@@ -39,6 +40,9 @@ export class Marker extends React.Component<MapMarkerProps, MarkerState> {
   }
 }
 
+// Default Google Maps marker size, used to place the callout above the marker.
+const DEFAULT_MARKER_SIZE = { width: 22, height: 40 };
+
 interface MarkerFProps extends MapMarkerProps {
   calloutVisible: boolean;
   toggleCalloutVisible: () => void;
@@ -47,20 +51,6 @@ interface MarkerFProps extends MapMarkerProps {
 function MarkerF(props: MarkerFProps) {
   const map = useGoogleMap();
 
-  const customMarkerContainerRef = React.useRef<HTMLDivElement>(null);
-  const [markerSize, setMarkerSize] = React.useState<{
-    width: number;
-    height: number;
-  }>({ width: 22, height: 40 }); //22 x 40 is the default google maps marker size
-
-  React.useEffect(() => {
-    if (customMarkerContainerRef.current) {
-      setMarkerSize({
-        width: customMarkerContainerRef.current.clientWidth,
-        height: customMarkerContainerRef.current.clientHeight,
-      });
-    }
-  }, [customMarkerContainerRef.current]);
 
   const onMarkerPress = () => {
     if (map) {
@@ -79,7 +69,7 @@ function MarkerF(props: MarkerFProps) {
     calloutVisible: props.calloutVisible,
     toggleCalloutVisible: props.toggleCalloutVisible,
     coordinate: props.coordinate,
-    markerSize,
+    markerSize: DEFAULT_MARKER_SIZE,
     anchor: calloutAnchor,
   };
 

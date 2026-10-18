@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Marker } from './marker';
 import type { LocationObjectCoords } from 'expo-location';
+
+import { Marker } from './marker';
 
 interface UserLocationMarkerProps {
   coordinates: LocationObjectCoords;

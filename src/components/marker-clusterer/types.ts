@@ -1,7 +1,7 @@
 import React, { JSX } from 'react';
 import type { LatLng, Region } from 'react-native-maps';
 
-export type ClusterProps<P extends object = {}> = {
+export type ClusterProps<P extends object = Record<never, never>> = {
   pointCount: number;
   pointCountAbbreviated: number | string;
   coordinate: LatLng;
@@ -11,7 +11,7 @@ export type ClusterProps<P extends object = {}> = {
 export type MarkerClustererProps = {
   children?: React.ReactElement[];
   region: Region | null;
-  renderCluster?(props: ClusterProps<{}>): JSX.Element;
+  renderCluster?(props: ClusterProps): JSX.Element;
 };
 
 export type MarkerClustererHandle = {

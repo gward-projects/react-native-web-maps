@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Marker } from '../marker';
+
 import type { ClusterProps } from './types';
+import { Marker } from '../marker';
 
 export function Cluster(props: ClusterProps) {
   return (

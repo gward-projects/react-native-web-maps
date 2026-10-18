@@ -1,0 +1,5 @@
+# Husky lance déjà ce fichier avec `sh -e` ; `set -e` rend le hook explicitement
+# bloquant à la première commande en échec, y compris exécuté directement.
+set -e
+
+yarn check

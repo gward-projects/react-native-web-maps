@@ -1,6 +1,7 @@
 import React from 'react';
-import { Polygon as GMPolygon, useGoogleMap } from '@react-google-maps/api';
 import type { MapPolygonProps } from 'react-native-maps';
+import { Polygon as GMPolygon, useGoogleMap } from '@react-google-maps/api';
+
 import { mapMouseEventToMapEvent } from '../utils/mouse-event';
 
 export function Polygon(props: MapPolygonProps) {
