@@ -1,4 +1,4 @@
-import React, { JSX, memo, type ReactElement, useMemo, useState } from 'react';
+import { Children, Fragment, JSX, memo, type ReactElement, useMemo, useState } from 'react';
 import type { MapMarkerProps } from 'react-native-maps';
 import Supercluster, {
   type AnyProps,
@@ -24,7 +24,7 @@ function MarkerClustererComponent(props: MarkerClustererProps) {
 
   const markers = useMemo(
     () =>
-      (React.Children.toArray(props.children).filter((child) => {
+      (Children.toArray(props.children).filter((child) => {
         return (child as ReactElement).type === Marker;
       }) as ReactElement<MapMarkerProps>[]) || [],
     [props.children],
@@ -80,13 +80,13 @@ function MarkerClustererComponent(props: MarkerClustererProps) {
         };
 
         return (
-          <React.Fragment key={idx.toString()}>
+          <Fragment key={idx.toString()}>
             {feature.properties.cluster
               ? props.renderCluster?.(clusterProps) || (
               <Cluster {...clusterProps} />
             )
               : feature.properties.node}
-          </React.Fragment>
+          </Fragment>
         );
       })}
     </>

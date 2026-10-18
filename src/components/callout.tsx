@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { InfoWindow as GMInfoWindow, useMap } from '@vis.gl/react-google-maps';
 import type { LatLng, MapCalloutProps, Point } from 'react-native-maps';
 
@@ -13,7 +13,7 @@ export type CalloutContextType = {
   anchor: Point;
 };
 
-export const CalloutContext = React.createContext<CalloutContextType>({
+export const CalloutContext = createContext<CalloutContextType>({
   coordinate: { latitude: 0, longitude: 0 },
   calloutVisible: false,
   toggleCalloutVisible: () => {
@@ -31,13 +31,17 @@ export function Callout(props: MapCalloutProps) {
     toggleCalloutVisible,
     markerSize,
     anchor,
-  } = React.useContext(CalloutContext);
+  } = useContext(CalloutContext);
 
   //By default callout is positioned to bottom center
   //i.e. is at anchor: (0.5, 1)
   //This compensates to match expected result using the provided anchor prop
   const xOffset = -(markerSize.width * (0.5 - anchor.x));
   const yOffset = -(markerSize.height * (1 - anchor.y));
+  // Stable between renders: the vis.gl InfoWindow closes and reopens whenever this array changes,
+  // and reopening auto-pans the map, which cancelled the drag in progress (for instance when
+  // the screen re-renders on returning to the map).
+  const pixelOffset = useMemo<[number, number]>(() => [xOffset, yOffset], [xOffset, yOffset]);
 
   return calloutVisible ? (
     <div
@@ -67,7 +71,7 @@ export function Callout(props: MapCalloutProps) {
             lat: Number(coordinate.latitude),
             lng: Number(coordinate.longitude),
           }}
-          pixelOffset={[xOffset, yOffset]}
+          pixelOffset={pixelOffset}
           onCloseClick={() => toggleCalloutVisible()}
         >
           <>{props.children}</>

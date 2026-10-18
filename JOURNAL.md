@@ -53,6 +53,11 @@ gère nativement les Advanced Markers ; `@react-google-maps/api` évoluait peu. 
   `marker.web.tsx` utilise l'`AdvancedMarker` de vis.gl, contenu centré sur la position
   (`anchorLeft`/`anchorTop` à `-50%`, comme l'ancien `translate(0, 50%)`), épingle par défaut ancrée
   par le bas, `Callout` rendus à côté du marqueur. Testé sur le web par le propriétaire.
+- `callout.tsx` (0.11.4) : `pixelOffset` mémorisé. L'`InfoWindow` de vis.gl ferme et rouvre la
+  fenêtre dès que ce tableau change (comparaison par identité) ; un nouveau tableau à chaque rendu la
+  rouvrait donc à chaque rendu, et l'ouverture recadrait la carte (autopan), ce qui annulait un
+  déplacement commencé au même moment (par exemple au retour sur la carte, quand l'écran se
+  redessine). Testé sur le web par le propriétaire.
 - `@types/google.maps` et `@types/react-dom` passent en dépendances : gward-app compile les sources
   du fork et ne trouvait les types `google` que par `@react-google-maps/api`. Le point d'entrée web
   référence `google.maps`. `@types/react-dom` 19.3 exige `@types/react` ^19.3 : gward-app, encore
