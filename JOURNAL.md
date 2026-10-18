@@ -49,6 +49,10 @@ gère nativement les Advanced Markers ; `@react-google-maps/api` évoluait peu. 
 - `polygon.tsx`, `polyline.tsx`, `circle.tsx` : composants vis.gl ; `Polygon` appelle enfin
   `onPress`.
 - `heat-map.tsx` supprimé : jamais exporté, et la couche de visualisation de Google est dépréciée.
+- `AdvancedMarker.tsx`, copie adaptée d'une ancienne version de celui de vis.gl, supprimé (0.11.3) :
+  `marker.web.tsx` utilise l'`AdvancedMarker` de vis.gl, contenu centré sur la position
+  (`anchorLeft`/`anchorTop` à `-50%`, comme l'ancien `translate(0, 50%)`), épingle par défaut ancrée
+  par le bas, `Callout` rendus à côté du marqueur. Testé sur le web par le propriétaire.
 - `@types/google.maps` et `@types/react-dom` passent en dépendances : gward-app compile les sources
   du fork et ne trouvait les types `google` que par `@react-google-maps/api`. Le point d'entrée web
   référence `google.maps`. `@types/react-dom` 19.3 exige `@types/react` ^19.3 : gward-app, encore

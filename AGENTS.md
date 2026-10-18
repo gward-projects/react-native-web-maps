@@ -107,7 +107,10 @@ imports de types avec les modules du projet.
 - dépendances des hooks corrigées (voir le journal du 17 octobre 2026) ;
 - **`@vis.gl/react-google-maps`** remplace `@react-google-maps/api` (journal du 18 octobre 2026) :
   `APIProvider` et `Map` dans `map-view.tsx`, `useMap` dans les marqueurs et callouts, composants
-  `InfoWindow`, `Polygon`, `Polyline` et `Circle` de vis.gl. vis.gl n'ayant pas d'`OverlayView`,
+  `AdvancedMarker`, `InfoWindow`, `Polygon`, `Polyline` et `Circle` de vis.gl. La copie locale
+  d'`AdvancedMarker` a été supprimée : `marker.web.tsx` centre le contenu personnalisé sur la
+  position (`anchorLeft`/`anchorTop` à `-50%`), garde l'épingle par défaut ancrée par le bas, et
+  rend les `Callout` à côté du marqueur. vis.gl n'ayant pas d'`OverlayView`,
   `overlay-view.tsx` en fournit un, utilisé par les callouts `tooltip`. La heatmap, jamais exportée
   et reposant sur une couche dépréciée par Google, a été retirée ;
 - la carte est **non contrôlée** (`defaultCenter`, `defaultZoom`…) : un rendu ne la déplace jamais.
