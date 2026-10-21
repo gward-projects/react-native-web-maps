@@ -3,7 +3,7 @@ import test from "node:test";
 
 import {runStaticChecks} from "../../../tools/checks/staticChecks";
 
-test("lint and typecheck start before either one completes", async () => {
+test("every static check starts before any one completes", async () => {
     const startedChecks: string[] = [];
     const resolvers = new Map<string, (exitCode: number) => void>();
     const checksPromise = runStaticChecks((check) => {
@@ -12,14 +12,15 @@ test("lint and typecheck start before either one completes", async () => {
         return new Promise((resolve) => resolvers.set(check, resolve));
     });
 
-    assert.deepEqual(startedChecks, ["lint", "typecheck"]);
-    resolvers.get("typecheck")?.(0);
-    resolvers.get("lint")?.(0);
+    assert.deepEqual(startedChecks, ["lint", "typecheck", "dedupe"]);
+    for (const resolve of resolvers.values()) {
+        resolve(0);
+    }
 
     await assert.doesNotReject(checksPromise);
 });
 
-test("the orchestration fails after both checks finish when one fails", async () => {
+test("the orchestration fails after every check finishes when one fails", async () => {
     const finishedChecks: string[] = [];
 
     await assert.rejects(
@@ -30,10 +31,10 @@ test("the orchestration fails after both checks finish when one fails", async ()
         }),
         /Contrôles statiques en échec : lint/,
     );
-    assert.deepEqual(finishedChecks.sort(), ["lint", "typecheck"]);
+    assert.deepEqual(finishedChecks.sort(), ["dedupe", "lint", "typecheck"]);
 });
 
-test("a process start error is blocking without cancelling the other check", async () => {
+test("a process start error is blocking without cancelling the other checks", async () => {
     const completedChecks: string[] = [];
 
     await assert.rejects(
@@ -47,5 +48,12 @@ test("a process start error is blocking without cancelling the other check", asy
         }),
         /Contrôles statiques en échec : lint/,
     );
-    assert.deepEqual(completedChecks, ["typecheck"]);
+    assert.deepEqual(completedChecks, ["typecheck", "dedupe"]);
+});
+
+test("a check stopped by a signal is reported with its exit code", async () => {
+    await assert.rejects(
+        () => runStaticChecks(async (check) => check === "dedupe" ? 129 : 0),
+        /Contrôles statiques en échec : dedupe \(code 129, interrompu par un signal, par exemple faute de mémoire\)/,
+    );
 });

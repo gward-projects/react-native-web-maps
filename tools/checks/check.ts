@@ -2,10 +2,10 @@ import {fileURLToPath} from "node:url";
 import path from "node:path";
 import {spawn} from "node:child_process";
 
-import {runStaticChecks} from "./staticChecks";
+import {describeExitCode, runStaticChecks} from "./staticChecks";
 
 // Same guard as gward-app, without its web export and
-// bundle budgets: lint and typecheck in parallel, then the tests.
+// bundle budgets: lint, typecheck and the lockfile dedupe check in parallel, then the tests.
 type CheckScript = "test";
 type CheckRunner = (script: CheckScript) => Promise<number>;
 type StaticChecksRunner = () => Promise<void>;
@@ -36,7 +36,7 @@ const runBlockingScript = async (
     }
 
     if (exitCode !== 0) {
-        throw new Error(`${script} a échoué`);
+        throw new Error(`${script} a échoué (${describeExitCode(exitCode)})`);
     }
 };
 

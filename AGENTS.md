@@ -36,7 +36,7 @@ doute, regarder comment gward-app fait et faire de même.
 - Le champ `files` de `package.json` limite le paquet installé par gward-app au code de la
   bibliothèque : l'étendre lors de l'ajout d'un dossier de sources.
 - Dépendances de développement : seulement celles qui servent, sans doublon dans le lockfile
-  (`yarn dedupe --check` doit passer). Yarn les installe aussi lorsque gward-app installe le fork
+  (`yarn dedupe --check`, lancé par `yarn check`, doit passer). Yarn les installe aussi lorsque gward-app installe le fork
   depuis Git.
 - Versions : les forks suivent les dernières versions publiées (gward-app est mis à jour ensuite),
   sauf TypeScript, qui reste en 6.x tant qu'Expo et React Native ne prennent pas en charge
@@ -52,7 +52,7 @@ doute, regarder comment gward-app fait et faire de même.
 
 | Commande | Usage |
 | -------- | ----- |
-| `yarn check` | garde complète, lancée par le pre-commit : lint et typecheck en parallèle, puis tests |
+| `yarn check` | garde complète, lancée par le pre-commit : lint, typecheck et `yarn dedupe --check` en parallèle, puis tests ; un contrôle en échec est signalé avec son code de sortie |
 | `yarn lint` | ESLint bloquant (`--max-warnings=0`) |
 | `yarn typecheck` | TypeScript bloquant |
 | `yarn test` | suites `node:test` de `tests/` (`tools/checks/test.ts`) |
