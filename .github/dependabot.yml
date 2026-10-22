@@ -11,6 +11,8 @@ updates:
       prefix: "deps"
       include: "scope"
     rebase-strategy: "auto"
+    cooldown:
+      default-days: 1 # comme le npmMinimalAgeGate par défaut de Yarn
     groups:
       security-updates:
         patterns:

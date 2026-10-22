@@ -131,7 +131,9 @@ Une montée de versions qui demande d'examiner des différences se consigne dans
 Dependabot (`.github/dependabot.yml`) vérifie une fois par mois, sur la branche par défaut. Ses PR
 ne servent que de **veille** : elles signalent qu'une version est sortie, la montée se fait à la
 main. Ne pas proposer de les fusionner, de les fermer ni de les rebaser. Le groupe
-`security-updates` laisse passer les versions majeures volontairement.
+`security-updates` laisse passer les versions majeures volontairement. Le `cooldown` d'un jour
+aligne les PR sur `npmMinimalAgeGate` : une version n'est signalée qu'une fois installable ; les
+alertes de sécurité de Dependabot n'y sont pas soumises.
 
 ## Commits et poussées
 
