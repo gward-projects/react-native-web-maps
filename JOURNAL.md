@@ -1,6 +1,6 @@
 # Journal des mises à jour de dépendances
 
-**Nature :** historique vivant des revues de versions · **Dernière mise à jour :** 18 octobre 2026.
+**Nature :** historique vivant des revues de versions · **Dernière mise à jour :** 8 novembre 2026.
 
 Ce fichier suit les mêmes règles que le journal des dépendances de gward-app, dont il reprend le
 format.
@@ -21,6 +21,38 @@ Chaque correctif annoncé comme un apport doit être rattaché à la version exa
 comparant les archives npm et les commits amont (voir la procédure de
 montée des dépendances de gward-app). Une simple montée
 sans différence à analyser ne nécessite pas d'entrée.
+
+## 8 novembre 2026 — vis.gl 1.10.2, `@types/google.maps` 3.66.10, React Native 0.88.1 et React 19.3.1
+
+| Package | Départ | Arrivée |
+| ------- | ------ | ------- |
+| `@vis.gl/react-google-maps` | 1.10.1 | 1.10.2 |
+| `@types/google.maps` | 3.66.7 | 3.66.10 |
+| `react-native` (développement) | 0.88.0 | 0.88.1 |
+| `react`, `react-dom` (développement) | 19.3.0 | 19.3.1 |
+| `expo-location` (développement) | 58.0.17 | 58.0.20 |
+| `@types/estree` (développement) | 1.0.9 | 1.0.10 |
+
+- **vis.gl 1.10.2** : la caméra contrôlée ne bloque plus le déplacement à la souris
+  ([visgl/react-google-maps#1108](https://github.com/visgl/react-google-maps/pull/1108), issue
+  #425) ; `useMapCameraParams` ne s'exécute qu'avec `center`, `zoom`, `heading` ou `tilt`
+  contrôlés, et `map-view.tsx` ne passe que les `default*` : sans effet ici. La règle de la carte
+  non contrôlée (`AGENTS.md`) reste. `MapMode.ROADMAP` par défaut pour `Map3D`
+  ([#1094](https://github.com/visgl/react-google-maps/pull/1094)), non utilisé. La copie embarquée
+  de `fast-equals` passe de 6.0.3 à 6.2.1 (comparaison des `Error`, des `Date` et des propriétés
+  non énumérables), sans effet sur les objets d'options du fork ; environ +1,3 Ko minifié
+  (+0,45 Ko gzip). `InfoWindow`, `AdvancedMarker`, `Polygon`, `Polyline` et `Circle` sont
+  inchangés.
+- **`@types/google.maps` 3.66.8 à 3.66.10** : ajouts seulement (`containsLocation` accepte un
+  `Circle`, `Settings.contentTokens`, `PlacePopularTimesElement`) ; aucun type utilisé par le fork
+  ne change.
+- React Native 0.88.1 et `expo-location` 58.0.20 : versions de gward-app, revues dans son journal
+  (30 octobre 2026). React 19.3.1 : seulement le protocole Flight des React Server Components
+  ([facebook/react#37845](https://github.com/facebook/react/pull/37845)), monté avec `react-dom`,
+  qui exige la même version que `react` ; gward-app reste en 19.3.0.
+- `@types/estree` 1.0.10 ([DefinitelyTyped#75804](https://github.com/DefinitelyTyped/DefinitelyTyped/pull/75804)) :
+  `Program["body"]`, utilisé par la règle de tri des imports, garde le même type.
+- Vérifications : `yarn check` passe. Non exécuté : essai dans le navigateur.
 
 ## 18 octobre 2026 — Passage de @react-google-maps/api à @vis.gl/react-google-maps
 
